@@ -1,0 +1,82 @@
+# ---------------------------------------------------------------------------
+# VoTrip — repo-wide ignores
+# Two independent toolchains live here (backend/ Maven+Java, frontend/ pnpm+
+# Turborepo). Sections are kept separate so each side stays easy to reason
+# about — see docs/03-TechStack.md §3.
+# ---------------------------------------------------------------------------
+
+# --- Backend: Java / Maven -------------------------------------------------
+target/
+build/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+dependency-reduced-pom.xml
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+buildNumber.properties
+
+# --- Frontend: Node / pnpm / Turborepo -------------------------------------
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.turbo/
+dist/
+out/
+*.tsbuildinfo
+
+# Next.js
+.next/
+.vercel/
+
+# Expo / EAS / React Native
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Test / coverage output
+coverage/
+.nyc_output/
+
+# --- Secrets & local config ------------------------------------------------
+# Nothing credential-bearing is ever committed (docs/03-TechStack.md §11)
+.env
+.env.*
+!.env.example
+*.pem
+serviceAccountKey.json
+firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+application-local.properties
+application-local.yml
+
+# --- Editors & OS ----------------------------------------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+*.swp
+*~
