@@ -1,0 +1,25 @@
+# Local Postgres for development. Values come from backend/.env (git-ignored);
+# the defaults below are what you get if that file is absent.
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: votrip-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-votrip}
+      POSTGRES_USER: ${POSTGRES_USER:-votrip}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-votrip}
+      # Pinned explicitly so the data volume behaves the same across Postgres major versions.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - votrip-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-votrip} -d ${POSTGRES_DB:-votrip}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  votrip-postgres-data:

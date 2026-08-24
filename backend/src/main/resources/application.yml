@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: votrip-api
+
+  # Loads backend/.env as a property source, so FIREBASE_CREDENTIALS_PATH and the
+  # datasource values resolve without exporting them into the shell first. Marked
+  # optional so the app still boots from real environment variables where no .env
+  # exists (CI, deployed environments). The path is relative to the working
+  # directory - this resolves when the app is run from backend/.
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/votrip}
+    username: ${DATABASE_USERNAME:votrip}
+    password: ${DATABASE_PASSWORD:votrip}
+
+  jpa:
+    # The schema is owned by migrations, never by Hibernate - see CONTRIBUTING.md.
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+server:
+  port: ${SERVER_PORT:8080}
+
+votrip:
+  firebase:
+    # Absolute path to the Firebase service account JSON. Required - there is no local auth
+    # bypass (CLAUDE.md), so the app deliberately fails to start if this is not set.
+    credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
+    # Optional. Left blank, the Admin SDK reads the project from the service account file.
+    project-id: ${FIREBASE_PROJECT_ID:}
+
+logging:
+  level:
+    com.votrip: DEBUG
