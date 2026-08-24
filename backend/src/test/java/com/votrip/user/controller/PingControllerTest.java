@@ -23,8 +23,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 /**
  * Covers the auth path, which is the entire point of the walking skeleton: a caller with no token
- * or a rejected token must never reach the endpoint, and a verified caller must get back the UID
- * the server resolved rather than anything the client claimed about itself.
+ * or a rejected token must never reach the endpoint, and a verified caller must get back the
+ * identity the server resolved rather than anything the client claimed about itself.
  *
  * <p>FirebaseAuth is mocked so the suite needs neither real credentials nor a database, which is
  * what lets {@code ./mvnw verify} run in CI (CONTRIBUTING.md).
@@ -40,7 +40,7 @@ class PingControllerTest {
     private FirebaseAuth firebaseAuth;
 
     @Test
-    void returnsUidWhenTokenIsValid() throws Exception {
+    void returnsResolvedIdentityWhenTokenIsValid() throws Exception {
         FirebaseToken token = mock(FirebaseToken.class);
         when(token.getUid()).thenReturn("firebase-uid-123");
         when(token.getEmail()).thenReturn("traveller@example.com");
@@ -51,7 +51,23 @@ class PingControllerTest {
         mockMvc
                 .perform(get("/api/v1/ping").header(HttpHeaders.AUTHORIZATION, "Bearer valid-token"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.uid").value("firebase-uid-123"));
+                .andExpect(jsonPath("$.uid").value("firebase-uid-123"))
+                .andExpect(jsonPath("$.email").value("traveller@example.com"));
+    }
+
+    @Test
+    void returnsNullEmailWhenTokenCarriesNoEmailClaim() throws Exception {
+        // Phone-number and anonymous Firebase providers issue tokens with no email claim.
+        FirebaseToken token = mock(FirebaseToken.class);
+        when(token.getUid()).thenReturn("firebase-uid-456");
+        when(token.getEmail()).thenReturn(null);
+        when(firebaseAuth.verifyIdToken("phone-token")).thenReturn(token);
+
+        mockMvc
+                .perform(get("/api/v1/ping").header(HttpHeaders.AUTHORIZATION, "Bearer phone-token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.uid").value("firebase-uid-456"))
+                .andExpect(jsonPath("$.email").isEmpty());
     }
 
     @Test
