@@ -20,7 +20,21 @@
     <properties>
         <java.version>21</java.version>
         <firebase-admin.version>9.10.0</firebase-admin.version>
+        <!-- Not managed by the Spring Boot 4 parent, so the BOM is imported below. -->
+        <testcontainers.version>1.21.3</testcontainers.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -87,6 +101,23 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Integration tests run the real migration against a real Postgres, which is the only
+             way ddl-auto=validate and a column DEFAULT actually get proven. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -94,6 +125,31 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- Surefire runs *Test (unit); without this, *IT classes are compiled and then
+                 silently skipped, so `mvnw verify` would go green having run no integration
+                 tests at all. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Testcontainers' bundled docker-java negotiates an API version below
+                             the minimum modern Docker Engines accept, so every strategy fails
+                             with a bare 400 and the suite reports "Could not find a valid Docker
+                             environment" on a machine where docker works fine. Pinning a floor
+                             the daemon accepts is what makes the ITs runnable. -->
+                        <api.version>1.44</api.version>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

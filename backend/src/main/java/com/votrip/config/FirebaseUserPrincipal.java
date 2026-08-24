@@ -8,12 +8,17 @@ import java.security.Principal;
  * Roles in VoTrip are scoped per trip via {@code TRIP_MEMBER}, never global to a user
  * (docs/02-SRS-ERD.md §2), so there is nothing role-shaped to put here.
  */
-public record FirebaseUserPrincipal(String uid, String email, boolean emailVerified, String displayName)
+public record FirebaseUserPrincipal(
+        String uid, String email, boolean emailVerified, String displayName, String picture)
         implements Principal {
 
     public static FirebaseUserPrincipal from(FirebaseToken token) {
         return new FirebaseUserPrincipal(
-                token.getUid(), token.getEmail(), token.isEmailVerified(), token.getName());
+                token.getUid(),
+                token.getEmail(),
+                token.isEmailVerified(),
+                token.getName(),
+                token.getPicture());
     }
 
     /** {@code Authentication.getName()} resolves to the Firebase UID. */
