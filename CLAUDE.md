@@ -46,8 +46,9 @@ making a non-trivial design call:
 
 Progress is tracked in `PROGRESS.md` at the repo root — GitHub Issues are
 **not** the task source of truth. Work is picked ad-hoc, not from an issue
-queue. When a piece of work is finished, move its line from "Not started" to
-"Done" in `PROGRESS.md` in the same commit.
+queue. `PROGRESS.md` is a rough status note, not a task list — update the
+area lines when an area's state changes. Do not expand it into a checklist
+or add unbuilt work to it.
 
 ## Commands
 
