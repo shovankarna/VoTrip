@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.votrip.trip.dto.TripCreateRequest;
 import com.votrip.trip.entity.Trip;
 import com.votrip.trip.entity.TripMember;
 import com.votrip.trip.entity.TripMemberRole;
@@ -75,9 +76,13 @@ class TripAccessServiceIT {
         otherUser = users.save(User.provisionFromToken("uid-other", "other@example.com", "Other", null));
     }
 
+    private static TripCreateRequest createRequest(String name) {
+        return new TripCreateRequest(name, null, null, null, null, null, null);
+    }
+
     @Test
     void creatorBecomesGuideOnCreate() {
-        Trip trip = tripService.create(creator, "Test Trip");
+        Trip trip = tripService.create(creator, createRequest("Test Trip"));
 
         assertThat(tripAccess.roleOf(trip.getId(), creator.getId())).contains(TripMemberRole.GUIDE);
         assertThat(tripAccess.isGuide(trip.getId(), creator.getId())).isTrue();
@@ -86,7 +91,7 @@ class TripAccessServiceIT {
 
     @Test
     void nonMemberIsDenied() {
-        Trip trip = tripService.create(creator, "Test Trip");
+        Trip trip = tripService.create(creator, createRequest("Test Trip"));
 
         assertThat(tripAccess.isMember(trip.getId(), otherUser.getId())).isFalse();
         assertThatThrownBy(() -> tripAccess.requireMembership(trip.getId(), otherUser.getId()))
@@ -95,7 +100,7 @@ class TripAccessServiceIT {
 
     @Test
     void memberIsAllowedButNotAsGuide() {
-        Trip trip = tripService.create(creator, "Test Trip");
+        Trip trip = tripService.create(creator, createRequest("Test Trip"));
         tripMembers.save(TripMember.joinedAs(trip.getId(), otherUser.getId(), TripMemberRole.MEMBER));
 
         assertThat(tripAccess.isMember(trip.getId(), otherUser.getId())).isTrue();
