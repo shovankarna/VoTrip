@@ -9,10 +9,13 @@ state changes.
   verified server-side, `USER` entity + auto-provisioning, Flyway-managed
   schema, `GET /api/v1/ping` and `GET /api/v1/users/me`, tests passing.
   Verified end-to-end against `votrip-dev` with real tokens.
+- Trips — `TRIP` + `TRIP_MEMBER` schema, creator-becomes-guide on create, and
+  the shared `TripAccessService` resource-authorization check. No CRUD
+  endpoints yet.
 
 ## Now
 
-- Trips — `TRIP` + `TRIP_MEMBER` schema, then resource authz.
+- Trip CRUD + invite-code join.
 
 ## Not touched
 
