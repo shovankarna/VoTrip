@@ -9,13 +9,13 @@ state changes.
   verified server-side, `USER` entity + auto-provisioning, Flyway-managed
   schema, `GET /api/v1/ping` and `GET /api/v1/users/me`, tests passing.
   Verified end-to-end against `votrip-dev` with real tokens.
-- Trips — `TRIP` + `TRIP_MEMBER` schema, creator-becomes-guide on create, and
-  the shared `TripAccessService` resource-authorization check. No CRUD
-  endpoints yet.
+- Trips — schema, creator-becomes-guide, `TripAccessService`, full CRUD, and
+  invite-code join, all in place.
 
 ## Now
 
-- Trip CRUD + invite-code join.
+- Member management — explicit invites, member removal, "at least one
+  active guide," and trip lifecycle status transitions.
 
 ## Not touched
 
