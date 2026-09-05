@@ -1,6 +1,12 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding agents — Claude Code, Codex, and others — when working with code in this repository.
+
+## Keeping CLAUDE.md and AGENTS.md in Sync
+
+CLAUDE.md and AGENTS.md must always contain the same instructions. Any edit
+to one must be applied to the other in the same commit. If you find them out
+of sync, stop and flag it before continuing.
 
 ## Project Overview
 
@@ -35,6 +41,13 @@ making a non-trivial design call:
 - `docs/04-FutureScope.md` — deferred features and the schema watch-list;
   check this before over- or under-building something that touches a
   future feature
+
+## Progress Tracking
+
+Progress is tracked in `PROGRESS.md` at the repo root — GitHub Issues are
+**not** the task source of truth. Work is picked ad-hoc, not from an issue
+queue. When a piece of work is finished, move its line from "Not started" to
+"Done" in `PROGRESS.md` in the same commit.
 
 ## Commands
 
@@ -284,9 +297,9 @@ behaves identically on both platforms without testing.
 
 ## Working Across Both Sides in One Session
 
-Since backend and frontend live in the same repo, a single Claude Code
-session can (and often should) implement a feature vertically — endpoint,
-DTO, `shared-types` entry, `api-client` call, and UI in one pass. When
+Since backend and frontend live in the same repo, a single session can
+(and often should) implement a feature vertically — endpoint, DTO,
+`shared-types` entry, `api-client` call, and UI in one pass. When
 doing this:
 
 - Design the backend DTO shape first, treat it as final for the task, then
@@ -316,3 +329,38 @@ Both `apps/web` and `apps/mobile` point at the local Spring Boot API. No
 auth bypass in local dev — use a real Firebase project (dev/staging) with
 test accounts rather than mocking the identity layer, since so much of the
 authorization logic lives downstream of a verified token.
+
+## Definition of Done (applies to every issue)
+
+1. Implement only what's in the issue's scope. Flag ambiguity, don't
+   guess or expand scope.
+2. Write unit + integration tests covering the happy path and any real
+   edge cases implied by 02-SRS-ERD.md / 01-PRD.md (constraints,
+   cascades, enums, auth boundaries, concurrency where relevant).
+3. Run the full test suite (./mvnw verify) — must be green.
+4. Manually verify against a real dev account/token (curl) before
+   committing.
+5. Report back in two separate short messages:
+   (A) What changed — plain language, no code, as if to a product owner.
+   (B) Tests + verification — what was tested, the actual pass/fail
+       output pasted (not just "tests passed"), and anything you're
+       unsure of or couldn't verify.
+6. Do not commit until steps 3 and 4 are both green.
+7. Do not start the next issue until I've reviewed (A) and (B) from
+   this one.
+
+## Data Layer Convention
+
+- Schema changes are Flyway migrations (`src/main/resources/db/migration`),
+  never relied on via Hibernate `ddl-auto=update`/`create`. Set
+  `ddl-auto=validate` so the app fails fast if entities and migrations
+  drift apart.
+- Each issue that touches the schema includes its own migration file
+  (e.g. `V2__create_users_table.sql`) written to match 02-SRS-ERD.md
+  exactly — field types, nullability, unique constraints, check
+  constraints, and cascade rules (ON DELETE SET NULL vs CASCADE) as
+  specified there, not inferred from JPA defaults.
+- Before starting Issue 1 (User entity), confirm Flyway is already
+  configured from the walking skeleton (#1). If it's on ddl-auto
+  instead, fix that first as a small prep step and tell me before
+  proceeding.
