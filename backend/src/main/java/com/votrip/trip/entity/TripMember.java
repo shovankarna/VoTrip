@@ -64,7 +64,7 @@ public class TripMember {
     /**
      * An already-joined membership row - the shape both real joining paths land on (FR-3.4): the
      * creator-as-guide row {@link #creatorAsGuide} inserts today, and the self-join-via-invite-code
-     * row the future join flow will insert as role=member.
+     * row {@code TripService.joinByInviteCode} inserts as role=member.
      */
     public static TripMember joinedAs(UUID tripId, UUID userId, TripMemberRole role) {
         return new TripMember(UUID.randomUUID(), tripId, userId, role, TripMemberStatus.JOINED, null, Instant.now());
@@ -73,6 +73,16 @@ public class TripMember {
     /** The row TripService.create inserts for the trip's creator. */
     public static TripMember creatorAsGuide(UUID tripId, UUID userId) {
         return joinedAs(tripId, userId, TripMemberRole.GUIDE);
+    }
+
+    /**
+     * Accepts a pending invite: someone with status=invited who then also self-joins via the
+     * shareable code (or, once the explicit-invite flow exists, accepts directly) lands here.
+     * Deliberately not exposed for status=removed - see {@code TripService.joinByInviteCode}.
+     */
+    public void markJoined() {
+        this.status = TripMemberStatus.JOINED;
+        this.joinedAt = Instant.now();
     }
 
     public UUID getId() {
